@@ -89,7 +89,7 @@ to the settings above::
 
     tracklist.uris = http://icecast.radiofrance.fr/fip-hifi.aac
     tracklist.index = 0
-ource
+
 
 Project resources
 =================
