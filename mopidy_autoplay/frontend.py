@@ -6,6 +6,8 @@ playing the last track from the position before Mopidy was shut down.
 
 import logging
 import pathlib
+import glob
+import urllib.parse
 import json
 import pykka
 
@@ -139,11 +141,33 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
         """
         # Reset tracklist
         tlid = None
-        uris = self._get_config(state, 'tracklist', 'uris')
+        
+        playlist_schemes = tuple(self.core.playlists.get_uri_schemes().get())
+        uris = []
+        for uri in self._get_config(state, 'tracklist', 'uris'):
+            if uri.startswith('glob://'):
+                # Add files to the list of URIs
+                uris.extend(
+                    [f'file://{urllib.parse.quote(f)}'
+                     for f in glob.glob(uri[len('glob://'):])])
+            elif uri.startswith(playlist_schemes):
+                # Add contents of known playlists to the list of URIs
+                uris.extend(
+                    [track.uri
+                     for track
+                     in self.core.playlists.get_items(uri).get() or []])
+            elif '://' in uri:
+                scheme, location = uri.split('://', 1)
+                uris.append(f'{scheme}://{urllib.parse.quote(location)}')
+            else:
+                uris.append(uri)
+
         if uris:
+            # Clear tracklist and add URIs
             self.core.tracklist.clear()
             self.core.tracklist.add(uris=uris)
-            index = self._get_config(state, 'tracklist', 'index')
+            # Switch to specified index
+            index = self._get_config(state, 'tracklist', 'index') or 0
             try:
                 tlid = self.core.tracklist.get_tl_tracks().get()[index].tlid
             except Exception as e:

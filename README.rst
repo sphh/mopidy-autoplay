@@ -17,9 +17,17 @@ Mopidy-Autoplay
 Mopidy extension to automatically pick up where you left off and start playing
 the last track from the position before Mopidy was shut down.
 
+If you simply want to restore Mopidy's state exactly as it were when you left,
+you can set
+`core/restore_state <https://docs.mopidy.com/en/latest/config/#confval-core-restore_state>`_.
+to ``true``. The default behaviour of this extension is to mimick this, but by
+using this extension, you can modify the state. You can set the entries in the
+tracklist, the tracklist options, the playback state (e.g. set it to
+``paused``) and the mixer's volume (and mute state).
+
 **Notice**
 
-There are some similar extensions which might suite you better:
+There are some similar extensions which might suit your requirements better:
 
 - If you want to automatically play a playlist after start of the Mopidy
   service, use
@@ -90,6 +98,52 @@ to the settings above::
     tracklist.uris = http://icecast.radiofrance.fr/fip-hifi.aac
     tracklist.index = 0
 
+For more than one track, separate them with a comma ``,``. Please also note,
+that the URI is not encapsulated in quotation marks (``"`` or ``'``).
+
+**How to find the URIs?**
+
+You can use any of the URIs supported on your installation of Mopidy. Here are
+some examples:
+- ``file:///usr/share/sounds/alsa/Noise.wav`` (Extension
+  `Mopidy-File <https://docs.mopidy.com/en/latest/ext/file/>`_) must be
+  enabled, which it is by default)
+- ``http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio2_mf_p`` (Extension
+  `Mopidy-Stream <https://docs.mopidy.com/en/latest/ext/stream/>`_ must be
+  enabled, which it is by default)
+- ``m3u://<myplaylist>.m3u8`` (Extension
+  `Mopidy-M3U <https://docs.mopidy.com/en/latest/ext/m3u/>`_) must be enabled,
+  which it is by default) – all entries of this playlist will be inserted into
+  the list instead of ``m3u://``.
+
+In addition to these URIs, which are supported by Mopidy, Mopidy-Autoplay also
+supports a ``glob://`` URI, which implements
+`glob patterns <https://en.wikipedia.org/wiki/Glob_(programming)>`_ to play
+files from the file system, e.g. this URI will play all ``.wav`` files found in
+the directory ``/usr/share/sounds/alsa/``:
+- ``glob:///usr/share/sounds/alsa/*.wav`` (Extension
+  `Mopidy-File <https://docs.mopidy.com/en/latest/ext/file/>`_) must be
+  enabled, which it is by default) – all files found will be inserted into the
+  list instead of ``glob://``. Note, that according to
+  `Python's documentation <https://docs.python.org/3/library/glob.html#glob.glob>`_,
+  the order of the files is unpredictable and depends on the operating system.
+
+If you don't know, how the URI is named, you can do the following:
+1. Assemble the tracks, you want to play after start-up, put all of them into
+   Mopidy's queue.
+2. Stop Mopidy.
+3. Open the state file ``/var/lib/mopidy/autoplay/autoplay.state`` and look for
+   the ``tracklist/uris`` entry. This should be the list of URI you are looking
+   for.
+4. Copy this list into Mopidy's configuration file under
+   ``autoplay/tracklist.uris``, remove the square brackets (``[``, ``]``) and
+   the quotation marks (``"``) surrounding the URIs, keeping the commas (``,``)
+   between the URIs, e.g.
+   ``tracklist.uris = file:///usr/share/sounds/alsa/Noise.wav, http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio2_mf_p``.
+5. Take also notice of the ``tracklist/index`` entry in the state file, which
+   can be used as ``tracklist.index`` in the configuration file to start with
+   a certain entry.
+
 
 Project resources
 =================
@@ -102,6 +156,6 @@ Project resources
 Credits
 =======
 
-- Original author: `Stephan Helma <https://github.com/sphh>`__
-- Current maintainer: `Stephan Helma <https://github.com/sphh>`__
+- Original author: `Stephan Helma <https://github.com/sphh>`_
+- Current maintainer: `Stephan Helma <https://github.com/sphh>`_
 - `Contributors <https://github.com/sphh/mopidy-autoplay/graphs/contributors>`_
