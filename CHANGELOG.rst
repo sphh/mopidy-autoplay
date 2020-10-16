@@ -10,10 +10,11 @@ New features:
   ``m3u://``. The items of the playlist are inserted into the tracklist in
   the position, where the playlist entry occurs. The playlist scheme specified
   must be supported by Mopidy.
-- Glob patterns can be specified in ``autostart/tracklist.uris`` to insert
-  files into the tracklist. The URI is ``glob://`` followed by the file
-  pattern, e.g. ``glob:///usr/share/sounds/alsa/*.wav``. The ``File`` extension
-  must be enabled. (Bug #1)
+- Glob patterns can now be specified in ``autostart/tracklist.uris`` for
+  ``file://`` URIs to insert files into the tracklist. The URI is
+  ``match:file://`` followed by the file pattern, e.g.
+  ``match:file:///usr/share/sounds/alsa/*.wav``. The ``File`` extension must be
+  enabled. (Bug #1)
 
 Bugs:
 - Index defaults always to 0. (If Mopidy is closed with nothing playing, no

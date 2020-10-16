@@ -24,7 +24,7 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
     def __init__(self, config, core):
         """Initialize the `AutoplayFrontend` class."""
         logger.debug(
-            'Autoplay: __init__(%s, %s)',
+            "Autoplay: __init__(%s, %s)",
             config, core)
 
         super(AutoplayFrontend, self).__init__()
@@ -42,7 +42,7 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
 
     def on_start(self):                                         # noqa: D401
         """Called, when the extension is started."""
-        logger.debug('Autoplay: on_start()')
+        logger.debug("Autoplay: on_start()")
 
         state = self.read_state(self.statefile)
         if state:
@@ -50,7 +50,7 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
 
     def on_stop(self):                                          # noqa: D401
         """Called, when the extension is stopped."""
-        logger.debug('Autoplay: on_stop()')
+        logger.debug("Autoplay: on_stop()")
 
         state = self.store_state()
         self.write_state(state, self.statefile)
@@ -85,7 +85,7 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
         else:
             s = config
         logger.debug(
-            'Autoplay: _get_config(%s, %s, %s) = %s',
+            "Autoplay: _get_config(%s, %s, %s) = %s",
             state, controller, option, s)
         return s
 
@@ -107,7 +107,7 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
 
         """
         logger.debug(
-            'Autoplay: _set_option(%s, %s, %s)',
+            "Autoplay: _set_option(%s, %s, %s)",
             state, controller, option)
 
         # Get value to be set
@@ -145,11 +145,18 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
         playlist_schemes = tuple(self.core.playlists.get_uri_schemes().get())
         uris = []
         for uri in self._get_config(state, 'tracklist', 'uris'):
-            if uri.startswith('glob://'):
-                # Add files to the list of URIs
-                uris.extend(
-                    [f'file://{urllib.parse.quote(f)}'
-                     for f in glob.glob(uri[len('glob://'):])])
+            if uri.startswith('match:'):
+                match = uri.split('match:', 1)[1]
+                if match.startswith('file://'):
+                    # Add files to the list of URIs using the match as glob
+                    # pattern
+                    uris.extend(
+                        [f'file://{urllib.parse.quote(f)}'
+                         for f in glob.glob(match[len('file://'):])])
+                else:
+                    logger.warning(
+                        "Matching for URI %s not supported: %s",
+                        match, uri)
             elif uri.startswith(playlist_schemes):
                 # Add contents of known playlists to the list of URIs
                 uris.extend(
