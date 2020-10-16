@@ -116,15 +116,15 @@ some examples:
   which it is by default) – all entries of this playlist will be inserted into
   the list instead of ``m3u://``.
 
-In addition to these URIs, which are supported by Mopidy, Mopidy-Autoplay also
-supports a ``glob://`` URI, which implements
-`glob patterns <https://en.wikipedia.org/wiki/Glob_(programming)>`_ to play
-files from the file system, e.g. this URI will play all ``.wav`` files found in
-the directory ``/usr/share/sounds/alsa/``:
-- ``glob:///usr/share/sounds/alsa/*.wav`` (Extension
+In addition to these URIs, which are supported natively by Mopidy,
+Mopidy-Autoplay also supports a unique ``match:`` URI. Currently implemented
+are `glob patterns <https://en.wikipedia.org/wiki/Glob_(programming)>`_ to
+load many files from the file system, e.g. the URI will load all ``.wav``
+files found in the directory ``/usr/share/sounds/alsa/``:
+- ``match:file:///usr/share/sounds/alsa/*.wav`` (Extension
   `Mopidy-File <https://docs.mopidy.com/en/latest/ext/file/>`_) must be
   enabled, which it is by default) – all files found will be inserted into the
-  list instead of ``glob://``. Note, that according to
+  list instead of ``match:file://``. Note, that according to
   `Python's documentation <https://docs.python.org/3/library/glob.html#glob.glob>`_,
   the order of the files is unpredictable and depends on the operating system.
 
