@@ -105,6 +105,7 @@ that the URI is not encapsulated in quotation marks (``"`` or ``'``).
 
 You can use any of the URIs supported on your installation of Mopidy. Here are
 some examples:
+
 - ``file:///usr/share/sounds/alsa/Noise.wav`` (Extension
   `Mopidy-File <https://docs.mopidy.com/en/latest/ext/file/>`_) must be
   enabled, which it is by default)
@@ -121,6 +122,7 @@ Mopidy-Autoplay also supports a unique ``match:`` URI. Currently implemented
 are `glob patterns <https://en.wikipedia.org/wiki/Glob_(programming)>`_ to
 load many files from the file system, e.g. the URI will load all ``.wav``
 files found in the directory ``/usr/share/sounds/alsa/``:
+
 - ``match:file:///usr/share/sounds/alsa/*.wav`` (Extension
   `Mopidy-File <https://docs.mopidy.com/en/latest/ext/file/>`_) must be
   enabled, which it is by default) – all files found will be inserted into the
@@ -129,6 +131,7 @@ files found in the directory ``/usr/share/sounds/alsa/``:
   the order of the files is unpredictable and depends on the operating system.
 
 If you don't know, how the URI is named, you can do the following:
+
 1. Assemble the tracks, you want to play after start-up, put all of them into
    Mopidy's queue.
 2. Stop Mopidy.
