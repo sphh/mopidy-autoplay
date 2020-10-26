@@ -38,6 +38,17 @@ There are some similar extensions which might suit your requirements better:
   have a look at
   `Mopidy-Bookmarks <https://pypi.org/project/Mopidy-Bookmarks/>`_.
 
+**Caveats**
+
+- If this extension tries to play tracks from backends, that have not finished
+  initialising, the playing might fail. For a discussion see this
+  `topic <https://discourse.mopidy.com/t/restore-state-not-working-for-dlna-extension/4358>`_.
+- If you set Mopidy's configuration option ``core/restore_state = true``, this
+  might interfere with Mopidy-Autoplay, so it is best to either set
+  ``core/restore_state = false`` or delete this entry. (When I tested it,
+  Mopidy-Autoplay gets activated well after the state is restored with
+  ``core/restore_state``, thus Mopidy-Autoplay takes precedence.)
+
 
 Installation
 ============
@@ -107,8 +118,11 @@ You can use any of the URIs supported on your installation of Mopidy. Here are
 some examples:
 
 - ``file:///usr/share/sounds/alsa/Noise.wav`` (Extension
-  `Mopidy-File <https://docs.mopidy.com/en/latest/ext/file/>`_) must be
-  enabled, which it is by default)
+  `Mopidy-File <https://docs.mopidy.com/en/latest/ext/file/>`_ must be enabled,
+  which it is by default) Please note, that as of Mopidy version 3.0.2, it is
+  possible to load any file on the filesystem permission permitted, but that
+  might change in future to just allow files from directories mentioned in
+  ```file/media_dirs`` <https://docs.mopidy.com/en/latest/ext/file/#confval-file/media_dirs>`_.
 - ``http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio2_mf_p`` (Extension
   `Mopidy-Stream <https://docs.mopidy.com/en/latest/ext/stream/>`_ must be
   enabled, which it is by default)
