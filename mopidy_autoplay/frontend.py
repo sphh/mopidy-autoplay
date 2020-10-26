@@ -197,7 +197,7 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
             #   self._set_option(state, 'playback', 'state')
             playback = self._get_config(state, 'playback', 'state')
             if playback == 'stopped':
-                self.core.playback.stop().get()
+                self.core.playback.stop()
             elif playback == 'playing':
                 self.core.playback.play(tlid=tlid)
             elif playback == 'paused':

@@ -2,6 +2,22 @@
 Changelog
 *********
 
+v0.2.1 (2020-10-26)
+========================================
+
+Bugs:
+
+- 'Playback stopped' now stops.
+
+Improvements:
+
+- README.rst mentions possible conflict with ``core/restore_state = true``.
+- README.rst mentions possible problems, if backends needs longer to
+  initialize.
+- README.rst explains that by using the ``File`` extension (URI starts with
+  ``file://``) you can load any file permission permitted.
+
+
 v0.2.0 (2020-10-16)
 ========================================
 
