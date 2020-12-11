@@ -1,0 +1,9 @@
+*.py[cod]
+*.diff
+*BAK*
+*~
+* (copy).??
+__pycache__/
+.pytest_cache/
+.spyproject/
+build/
