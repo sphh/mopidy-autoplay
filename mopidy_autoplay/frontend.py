@@ -171,13 +171,34 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
             self.core.tracklist.add(uris=uris)
             # Switch to specified index
             index = self._get_config(state, 'tracklist', 'index') or 0
-            try:
-                tlid = self.core.tracklist.get_tl_tracks().get()[index].tlid
-            except Exception as e:
-                logger.warning(
-                    "Could not get tracklist index %s: %s",
-                    index, e)
-                tlid = None
+
+            # We count the index, because we might have the same track more
+            # than once in the tracklist
+            tl_tracks = self.core.tracklist.get_tl_tracks().get()
+            for i, uri in enumerate(uris):
+                if tl_tracks:
+                    track_uri = tl_tracks[0].track.uri
+                else:
+                    # Processed all available tracks, but there are still
+                    # tracks, which were requested
+                    track_uri = None
+                if uri == track_uri:
+                    if index == 0:
+                        tlid = tl_tracks[0].tlid
+                    tl_tracks.pop(0)
+                    index -= 1
+                else:
+                    logger.warning(
+                        "Tracklist %s loaded into tracklists, "
+                        "but it cannot be found there! "
+                        "Possible reasons are: "
+                        "1. The track has disappeared.  "
+                        "2. The backend '%s' does not exist.  "
+                        "3. The backend '%s' is not ready (yet).",
+                        uri, uri.split(':', 1)[0], uri.split(':', 1)[0])
+                    if index != 0:
+                        index -= 1
+
         self._set_option(state, 'tracklist', 'consume')
         self._set_option(state, 'tracklist', 'random')
         self._set_option(state, 'tracklist', 'repeat')
