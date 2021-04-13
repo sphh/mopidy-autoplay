@@ -7,7 +7,6 @@ playing the last track from the position before Mopidy was shut down.
 import logging
 import pathlib
 import glob
-import urllib.parse
 import json
 import pykka
 
@@ -151,7 +150,7 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
                     # Add files to the list of URIs using the match as glob
                     # pattern
                     uris.extend(
-                        [f'file://{urllib.parse.quote(f)}'
+                        [f'file://{f}'
                          for f in glob.glob(match[len('file://'):])])
                 else:
                     logger.warning(
@@ -163,9 +162,6 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
                     [track.uri
                      for track
                      in self.core.playlists.get_items(uri).get() or []])
-            elif '://' in uri:
-                scheme, location = uri.split('://', 1)
-                uris.append(f'{scheme}://{urllib.parse.quote(location)}')
             else:
                 uris.append(uri)
 
