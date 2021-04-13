@@ -23,7 +23,7 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
     def __init__(self, config, core):
         """Initialize the `AutoplayFrontend` class."""
         logger.debug(
-            "Autoplay: __init__(%s, %s)",
+            "__init__(%s, %s)",
             config, core)
 
         super(AutoplayFrontend, self).__init__()
@@ -34,14 +34,14 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
         data_dir = Extension.get_data_dir(config)
         self.statefile = pathlib.Path(data_dir) / 'autoplay.state'
         logger.debug(
-            "Autoplay: Use '%s' as statefile.",
+            "Use '%s' as statefile.",
             self.statefile)
 
     # The frontend implementation
 
     def on_start(self):                                         # noqa: D401
         """Called, when the extension is started."""
-        logger.debug("Autoplay: on_start()")
+        logger.debug("on_start()")
 
         state = self.read_state(self.statefile)
         if state:
@@ -49,7 +49,7 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
 
     def on_stop(self):                                          # noqa: D401
         """Called, when the extension is stopped."""
-        logger.debug("Autoplay: on_stop()")
+        logger.debug("on_stop()")
 
         state = self.store_state()
         self.write_state(state, self.statefile)
@@ -84,7 +84,7 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
         else:
             s = config
         logger.debug(
-            "Autoplay: _get_config(%s, %s, %s) = %s",
+            "_get_config(%s, %s, %s) = %s",
             state, controller, option, s)
         return s
 
@@ -106,7 +106,7 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
 
         """
         logger.debug(
-            "Autoplay: _set_option(%s, %s, %s)",
+            "_set_option(%s, %s, %s)",
             state, controller, option)
 
         # Get value to be set
@@ -120,7 +120,7 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
         # Set value (and log message, if failed)
         if not setter(value):
             logger.info(
-                "Autoplay: Set %s/%s to '%s' failed.",
+                "Set %s/%s to '%s' failed.",
                 controller, option, value)
 
     # Worker functions
@@ -140,7 +140,7 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
         """
         # Reset tracklist
         tlid = None
-        
+
         playlist_schemes = tuple(self.core.playlists.get_uri_schemes().get())
         uris = []
         for uri in self._get_config(state, 'tracklist', 'uris'):
@@ -175,7 +175,7 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
                 tlid = self.core.tracklist.get_tl_tracks().get()[index].tlid
             except Exception as e:
                 logger.warning(
-                    "Autoplay: Could not get tracklist index %s: %s",
+                    "Could not get tracklist index %s: %s",
                     index, e)
                 tlid = None
         self._set_option(state, 'tracklist', 'consume')
@@ -267,18 +267,18 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
                 state = json.load(f)
         except IOError as e:
             logger.warning(
-                "Autoplay: No state restored, "
+                "No state restored, "
                 "because there was a problem opening the state file '%s': %s",
                 file, e)
             return
         except json.JSONDecodeError as e:
             logger.error(
-                "Autoplay: Error reading state from file '%s': %s",
+                "Error reading state from file '%s': %s",
                 file, e)
             return
         else:
             logger.debug(
-                "Autoplay: State read from file '%s'.",
+                "State read from file '%s'.",
                 file)
 
         return state
@@ -303,16 +303,16 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
                 json.dump(state, f)
         except IOError as e:
             logger.error(
-                "Autoplay: Cannot open state file '%s' for writing: %s",
+                "Cannot open state file '%s' for writing: %s",
                 file, e)
         except Exception as e:
             logger.error(
-                "Autoplay: Problem saving state to file '%s': %s",
+                "Problem saving state to file '%s': %s",
                 file, e)
             logger.debug(
-                "Autoplay: State: %s",
+                "State: %s",
                 state)
         else:
             logger.debug(
-                "Autoplay: State written to file '%s'.",
+                "State written to file '%s'.",
                 file)
