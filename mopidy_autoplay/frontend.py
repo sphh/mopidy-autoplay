@@ -168,6 +168,7 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
         if uris:
             # Clear tracklist and add URIs
             self.core.tracklist.clear()
+            self.core.tracklist.set_consume(False)
             self.core.tracklist.add(uris=uris)
             # Switch to specified index
             index = self._get_config(state, 'tracklist', 'index') or 0
