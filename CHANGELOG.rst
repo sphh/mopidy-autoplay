@@ -2,6 +2,21 @@
 Changelog
 *********
 
+v0.2.2 (2021-04-13)
+========================================
+
+Bugs:
+
+- No double encoding of uris. (Fixes first issue in #3)
+
+Improvements:
+
+- Sometimes tracks cannot be loaded into the tracklist. The URIs of these
+  tracks are now logged with a warning message mentioning possible reasons.
+  it also plays the next available track. (Fixes second issue in #3)
+- Remvove "Autoplay: " from log messages.
+
+
 v0.2.1 (2020-10-26)
 ========================================
 

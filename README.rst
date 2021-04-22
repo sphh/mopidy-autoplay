@@ -19,7 +19,7 @@ the last track from the position before Mopidy was shut down.
 
 If you simply want to restore Mopidy's state exactly as it were when you left,
 you can set
-`core/restore_state <https://docs.mopidy.com/en/latest/config/#confval-core-restore_state>`_.
+`core/restore_state <https://docs.mopidy.com/en/latest/config/#confval-core-restore_state>`_
 to ``true``. The default behaviour of this extension is to mimick this, but by
 using this extension, you can modify the state. You can set the entries in the
 tracklist, the tracklist options, the playback state (e.g. set it to
@@ -43,6 +43,10 @@ There are some similar extensions which might suit your requirements better:
 - If this extension tries to play tracks from backends, that have not finished
   initialising, the playing might fail. For a discussion see this
   `topic <https://discourse.mopidy.com/t/restore-state-not-working-for-dlna-extension/4358>`_.
+  If that happens, the next available track from the tracklist is played. If
+  there is no later track available, Mopidy-Autoplay will not play anything.
+  (All those tracks which cannot be played, can be found in the logfile with a
+  warning level.)
 - If you set Mopidy's configuration option ``core/restore_state = true``, this
   might interfere with Mopidy-Autoplay, so it is best to either set
   ``core/restore_state = false`` or delete this entry. (When I tested it,
