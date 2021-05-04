@@ -70,7 +70,7 @@ Configuration
 Before starting Mopidy, you must add configuration for
 Mopidy-Autoplay to your Mopidy configuration file::
 
-    [mopidy-autoplay]
+    [autoplay]
     enabled = true
 
     # Each of the following keys can take the value "auto" (without quotes),
