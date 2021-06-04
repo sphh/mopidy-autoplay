@@ -141,7 +141,6 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
         # Reset tracklist
         tlid = None
 
-        playlist_schemes = tuple(self.core.playlists.get_uri_schemes().get())
         uris = []
         for uri in self._get_config(state, 'tracklist', 'uris'):
             if uri.startswith('match:'):
@@ -156,27 +155,23 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
                     logger.warning(
                         "Matching for URI %s not supported: %s",
                         match, uri)
-            elif uri.startswith(playlist_schemes):
-                # Add contents of known playlists to the list of URIs
-                uris.extend(
-                    [track.uri
-                     for track
-                     in self.core.playlists.get_items(uri).get() or []])
             else:
                 uris.append(uri)
 
         if uris:
-            # Clear tracklist and add URIs
+            # Generate a list of track URIs from URIs
+            track_uris = [track.uri for sublist in self.core.library.lookup(uris).get().values() for track in sublist]
+            # Clear tracklist and add tracks
             self.core.tracklist.clear()
             self.core.tracklist.set_consume(False)
-            self.core.tracklist.add(uris=uris)
+            self.core.tracklist.add(uris=track_uris)
             # Switch to specified index
             index = self._get_config(state, 'tracklist', 'index') or 0
 
             # We count the index, because we might have the same track more
             # than once in the tracklist
             tl_tracks = self.core.tracklist.get_tl_tracks().get()
-            for i, uri in enumerate(uris):
+            for i, uri in enumerate(track_uris):
                 if tl_tracks:
                     track_uri = tl_tracks[0].track.uri
                 else:
