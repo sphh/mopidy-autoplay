@@ -92,6 +92,11 @@ class Extension(ext.Extension):
         # mute = True|False|"auto")
         schema['mixer.mute'] = AutoValue(config.Boolean)
 
+        # Save state frequently. Value in seconds. 
+        schema['autosave.enabled'] = AutoValue(config.Boolean)
+        schema['autosave.interval'] = AutoValue(
+            config.Integer, minimum=10, maximum=86400)
+
         return schema
 
     def setup(self, registry):

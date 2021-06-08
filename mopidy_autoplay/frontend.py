@@ -9,7 +9,7 @@ import pathlib
 import glob
 import json
 import pykka
-
+import threading
 from mopidy import core
 from . import Extension, Recollection
 
@@ -36,7 +36,11 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
         logger.debug(
             "Use '%s' as statefile.",
             self.statefile)
-
+        self._autosave_enabled = self.config['autosave.enabled'] 	
+        self._autosave_interval = self.config['autosave.interval'] 
+        self._autosave_thread = None
+        logger.debug("Read autosave_interval = %d",self._autosave_interval)
+		
     # The frontend implementation
 
     def on_start(self):                                         # noqa: D401
@@ -44,17 +48,35 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
         logger.debug("on_start()")
 
         state = self.read_state(self.statefile)
+
         if state:
             self.restore_state(state)
+        if self._autosave_enabled == True:
+           # Start timer thread
+           logger.debug("Start autosave thread timer %d sec",self._autosave_interval)
+           self._autosave_thread=threading.Timer(self._autosave_interval, self.on_timer)
+           self._autosave_thread.start()
+        else:   
+           logger.debug("Autosave disabled")
 
     def on_stop(self):                                          # noqa: D401
         """Called, when the extension is stopped."""
         logger.debug("on_stop()")
-
+        if isinstance(self._autosave_thread,threading.Timer):
+            # Stop timer thread before saving state to prevent a raise condition
+            logger.debug("Stop autosave thread")
+            self._autosave_thread.cancel()
         state = self.store_state()
         self.write_state(state, self.statefile)
 
     # Helper functions
+    def on_timer(self):
+        logger.info("Autosave state")
+        state = self.store_state()
+        self.write_state(state, self.statefile)
+        # Start next timer thread
+        self._autosave_thread=threading.Timer(self._autosave_interval, self.on_timer)
+        self._autosave_thread.start()
 
     def _get_config(self, state, controller, option):
         """
