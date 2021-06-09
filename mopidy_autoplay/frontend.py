@@ -36,10 +36,9 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
         logger.debug(
             "Use '%s' as statefile.",
             self.statefile)
-        self._autosave_enabled = self.config['autosave.enabled'] 	
-        self._autosave_interval = self.config['autosave.interval'] 
-        self._autosave_thread = None
-        logger.debug("Read autosave_interval = %d",self._autosave_interval)
+	
+        self._autosave_enabled = self.config['autosave.enabled']     
+        self._autosave_eventlist = self.config['autosave.events'] 
 		
     # The frontend implementation
 
@@ -51,33 +50,48 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
 
         if state:
             self.restore_state(state)
-        if self._autosave_enabled == True:
-           # Start timer thread
-           logger.debug("Start autosave thread timer %d sec",self._autosave_interval)
-           self._autosave_thread=threading.Timer(self._autosave_interval, self.on_timer)
-           self._autosave_thread.start()
-        else:   
-           logger.debug("Autosave disabled")
 
     def on_stop(self):                                          # noqa: D401
         """Called, when the extension is stopped."""
         logger.debug("on_stop()")
-        if isinstance(self._autosave_thread,threading.Timer):
-            # Stop timer thread before saving state to prevent a raise condition
-            logger.debug("Stop autosave thread")
-            self._autosave_thread.cancel()
+
         state = self.store_state()
         self.write_state(state, self.statefile)
 
-    # Helper functions
-    def on_timer(self):
-        logger.info("Autosave state")
+    def autosave_state(self,save_event):
+        logger.debug("Autosave ({0})".format(save_event))
         state = self.store_state()
-        self.write_state(state, self.statefile)
-        # Start next timer thread
-        self._autosave_thread=threading.Timer(self._autosave_interval, self.on_timer)
-        self._autosave_thread.start()
+        self.write_state(state, self.statefile)    
+    
+    def track_playback_started(self, tl_track):
+        if self._autosave_enabled != True:
+            return
+        logger.debug("{0}: {1}".format("track_playback_started",str(tl_track)))    
+        if "track_playback_started" in self._autosave_eventlist:
+            self.autosave_state("track_playback_started")
 
+    def playback_state_changed(self,old_state, new_state):
+        if self._autosave_enabled != True:
+            return    
+        logger.debug("{0}: {1} -> {2}".format("playback_state_changed",str(old_state),str(new_state)))
+        if "playback_state_changed" in self._autosave_eventlist:
+            self.autosave_state("playback_state_changed")
+    
+    def tracklist_changed(self):
+        if self._autosave_enabled != True:
+            return    
+        logger.debug("{0}".format("tracklist_changed"))
+        if "tracklist_changed" in self._autosave_eventlist:
+            self.autosave_state("tracklist_changed")
+        
+    def stream_title_changed(self,title):
+        if self._autosave_enabled != True:
+            return    
+        logger.debug("{0}: {1}".format("stream_title_changed",title)) 
+        if "stream_title_changed" in self._autosave_eventlist:
+            self.autosave_state("stream_title_changed")
+	
+	
     def _get_config(self, state, controller, option):
         """
         Return the configuration from `config` and `state`.
