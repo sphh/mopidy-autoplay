@@ -9,7 +9,7 @@ import pathlib
 import glob
 import json
 import pykka
-import datetime
+import time
 from mopidy import core
 from . import Extension, Recollection
 
@@ -36,17 +36,7 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
         logger.debug(
             "Use '%s' as statefile.",
             self.statefile)
-	
-        if len(self.config['autosave_events']) >= 1:
-            logger.info("Autosave enabled")
-            self._autosave_eventlist = self.config['autosave_events']
-            self._autosave_enabled = True
-        else:
-            self._autosave_enabled = False     
-		
-        self._autosave_min_save_frequency=60
-        self._autosave_lastsave_datetime=datetime.datetime.now()   
-		
+        self._last_autosave = time.time()
     # The frontend implementation
 
     def on_start(self):                                         # noqa: D401
@@ -66,21 +56,16 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
         self.write_state(state, self.statefile)
 
     def on_event(self, event, **kwargs):
-        logger.debug("Event %s args: %s",str(event),str(kwargs))
-        if self._autosave_enabled == True:
-            if str(event) in self._autosave_eventlist:
-                self.autosave_state(event)        
-        return CoreListener.on_event(self, event, **kwargs)
-    
-    def autosave_state(self,save_event):
-        current_time=datetime.datetime.now()
-        if (current_time-self._autosave_lastsave_datetime).seconds < self._autosave_min_save_frequency:
-            logger.debug("Skip autosave")
-            return
-        logger.info("Autosave ({0})".format(save_event))
-        state = self.store_state()
-        self.write_state(state, self.statefile)    
-        self._autosave_lastsave_datetime=current_time    
+        logger.debug("Event %s args: %s",event,str(kwargs))
+        if event in self.config['autosave_events']:
+            now = time.time()
+            if (now - self._last_autosave) < self.config['autosave_min_interval']:
+                logger.info("Skip autosave")
+            else:
+                logger.info("Autosave ({0})".format(event))
+                state = self.store_state()
+                self.write_state(state, self.statefile)    
+                self._last_autosave = now  
 	
     def _get_config(self, state, controller, option):
         """
