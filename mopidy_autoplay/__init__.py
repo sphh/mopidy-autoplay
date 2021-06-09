@@ -93,8 +93,7 @@ class Extension(ext.Extension):
         schema['mixer.mute'] = AutoValue(config.Boolean)
 
         # Save state on events 
-        schema['autosave.enabled'] = AutoValue(config.Boolean)
-        schema['autosave.events'] = AutoValue(config.List)
+        schema['autosave_events'] = AutoValue(config.List,optional=True)
 
         return schema
 
