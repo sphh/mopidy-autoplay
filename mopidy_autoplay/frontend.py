@@ -66,12 +66,7 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
         self.write_state(state, self.statefile)
 
     def on_event(self, event, **kwargs):
-        # if event == "IRButtonPressed":
-        #     logger.debug("Button pressed: " + str(kwargs))
-        #     if kwargs['button'] == "power":
-        #         logger.debug('on_event: calls toggle disco')
-        #         self.displayRenderer.toggleDisco()
-        logger.info("Event %s args: %s",str(event),str(kwargs))
+        logger.debug("Event %s args: %s",str(event),str(kwargs))
         if self._autosave_enabled == True:
             if str(event) in self._autosave_eventlist:
                 self.autosave_state(event)        
@@ -80,41 +75,12 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
     def autosave_state(self,save_event):
         current_time=datetime.datetime.now()
         if (current_time-self._autosave_lastsave_datetime).seconds < self._autosave_min_save_frequency:
-            logger.info("Skip autosave")
+            logger.debug("Skip autosave")
             return
         logger.info("Autosave ({0})".format(save_event))
         state = self.store_state()
         self.write_state(state, self.statefile)    
         self._autosave_lastsave_datetime=current_time    
-    
-    def track_playback_started(self, tl_track):
-        if self._autosave_enabled != True:
-            return
-        logger.debug("{0}: {1}".format("track_playback_started",str(tl_track)))    
-        if "track_playback_started" in self._autosave_eventlist:
-            self.autosave_state("track_playback_started")
-
-    def playback_state_changed(self,old_state, new_state):
-        if self._autosave_enabled != True:
-            return    
-        logger.debug("{0}: {1} -> {2}".format("playback_state_changed",str(old_state),str(new_state)))
-        if "playback_state_changed" in self._autosave_eventlist:
-            self.autosave_state("playback_state_changed")
-    
-    def tracklist_changed(self):
-        if self._autosave_enabled != True:
-            return    
-        logger.debug("{0}".format("tracklist_changed"))
-        if "tracklist_changed" in self._autosave_eventlist:
-            self.autosave_state("tracklist_changed")
-        
-    def stream_title_changed(self,title):
-        if self._autosave_enabled != True:
-            return    
-        logger.debug("{0}: {1}".format("stream_title_changed",title)) 
-        if "stream_title_changed" in self._autosave_eventlist:
-            self.autosave_state("stream_title_changed")
-	
 	
     def _get_config(self, state, controller, option):
         """
