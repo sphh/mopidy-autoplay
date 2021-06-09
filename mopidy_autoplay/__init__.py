@@ -94,6 +94,8 @@ class Extension(ext.Extension):
 
         # Save state on events 
         schema['autosave_events'] = AutoValue(config.List,optional=True)
+        schema['autosave_min_interval']	= AutoValue(
+            config.Integer, minimum=10)	
 
         return schema
 
