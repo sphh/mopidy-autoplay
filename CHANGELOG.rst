@@ -5,6 +5,12 @@ Changelog
 v0.2.3 (2021-05-04)
 ========================================
 
+New features:
+
+- Auto save: Save the state not just when Mopidy shuts down, but at
+  (configurable) events. To reduce stress on a SD card, a save interval can be
+  configured. (See #6, thanks @Race666 and @mikiair!)
+
 Bugs:
 
 - Fix the section name for the example of the ini file shown in the
