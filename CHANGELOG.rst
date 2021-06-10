@@ -9,7 +9,7 @@ New features:
 
 - Auto save: Save the state not just when Mopidy shuts down, but at
   (configurable) events. To reduce stress on a SD card, a save interval can be
-  configured. (See #6, thanks @Race666 and @mikiair!)
+  configured. See #6, thanks @Race666 and @mikiair! (Closes #4)
 
 Bugs:
 
