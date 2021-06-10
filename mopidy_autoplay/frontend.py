@@ -118,6 +118,16 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
         if state:
             self.restore_state(state)
 
+        # Add required keys to the state dictionary
+        if 'tracklist' not in state:
+            state['tracklist'] = {}
+        if 'mixer' not in state:
+            state['mixer'] = {}
+        if 'playback' not in state:
+            state['playback'] = {}
+
+        self.state = state
+
     def save_state(self):
         """Save the state to the disk."""
         logger.debug("save_state()")
@@ -305,12 +315,8 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
                 'mixer' and 'playback' controllers.
 
         """
-        # Initialize 'state' variable
-        state = {
-            'tracklist': {},
-            'mixer': {},
-            'playback': {},
-            }
+        # Shortcut
+        state = self.state
 
         # Tracks in tracklist
         tracklist = self.core.tracklist
@@ -373,8 +379,7 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
             logger.debug(
                 "State read from file '%s'.",
                 file)
-
-        return state
+            return state
 
     def write_state(self, state, file):
         """
