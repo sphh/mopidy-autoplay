@@ -57,6 +57,13 @@ class Extension(ext.Extension):
         schema = super().get_config_schema()
 
         #
+        # Save on events
+        #
+
+        schema['save_on_events'] = config.List(optional=True)
+        schema['save_interval'] = config.Integer(minimum=0)
+
+        #
         # Tracklist
         #
 

@@ -73,6 +73,19 @@ Mopidy-Autoplay to your Mopidy configuration file::
     [autoplay]
     enabled = true
 
+    # Save on events.
+    # https://docs.mopidy.com/en/latest/api/core/#core-events lists possible events,
+    # e.g.
+    #     save_on_events = track_playback_started,playback_state_changed
+    # saves the state whenever a track starts playing or the playback changes
+    # (stops, pauses, plays)
+    save_on_events =
+
+    # To reduce the number of write operations, it is possible to give an interval
+    # in seconds: All events will be collected for this interval and only written
+    # afterwards. If set to 0, the state will be saved immediately.
+    save_interval = 10
+
     # Each of the following keys can take the value "auto" (without quotes),
     # in which case the values active before Mopidy was stopped are used.
 
@@ -115,6 +128,24 @@ to the settings above::
 
 For more than one track, separate them with a comma ``,``. Please also note,
 that the URI is not encapsulated in quotation marks (``"`` or ``'``).
+
+**Autosave**
+
+To not just save the state, when Mopidy shuts down, you have to list all
+events, when the state should be saved. The possible events are listed and
+described in https://docs.mopidy.com/en/latest/api/core/#core-events.
+
+To get the state written immediately, set::
+
+    save_interval = 0
+
+If you use a SD-card and worry about excessive wear (e.g. when changing volume,
+each step would write the state file to the disk), increase this value, e.g.::
+
+    save_interval = 10
+
+and all changes will be collected for 10 seconds and the state file will be
+written at a maximum every tenth second.
 
 **How to find the URIs?**
 
