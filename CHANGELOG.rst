@@ -2,6 +2,15 @@
 Changelog
 *********
 
+v0.2.3 (2021-05-04)
+========================================
+
+Bugs:
+
+- Fix the section name for the example of the ini file shown in the
+  README.md file. (Fixes #5)
+
+
 v0.2.2 (2021-04-13)
 ========================================
 
