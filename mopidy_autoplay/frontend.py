@@ -216,14 +216,15 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
             playback = self._get_config(state, 'playback', 'state')
             if playback == 'stopped':
                 self.core.playback.stop()
-                return
             elif playback == 'playing':
                 self.core.playback.play(tlid=tlid)
             elif playback == 'paused':
                 self.core.playback.pause()
-            time_position = self._get_config(state, 'playback', 'time_position')
-            if time_position is not None:
-                self.core.playback.seek(time_position)
+            if playback != 'stopped':
+                time_position = self._get_config(
+                    state, 'playback', 'time_position')
+                if time_position is not None:
+                    self.core.playback.seek(time_position)
 
     def store_state(self):
         """
