@@ -2,7 +2,7 @@
 Changelog
 *********
 
-v0.2.3 (2021-05-04)
+v0.2.3 (2021-06-11)
 ========================================
 
 New features:
@@ -15,6 +15,15 @@ Bugs:
 
 - Fix the section name for the example of the ini file shown in the
   README.md file. (Fixes #5)
+- Seek only, if not stopped. Thanks @fmauNeko! (PR #7)
+
+Improvements:
+
+- Use library lookups instead of relying on playlist schemes to differentiate
+  between playlists and normal tracks. The old behaviour breaks with
+  spotify:URIs (the scheme is registered in the playlist schemes, which means
+  track URIs are processed as playlist URIs, preventing them to be added to the
+  tracklist). Thanks @fmauNeko! (PR #7)
 
 
 v0.2.2 (2021-04-13)
