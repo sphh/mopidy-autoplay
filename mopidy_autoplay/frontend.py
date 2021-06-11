@@ -8,6 +8,10 @@ import logging
 import pathlib
 import glob
 import json
+import threading
+import queue
+import time
+
 import pykka
 
 from mopidy import core
@@ -15,6 +19,42 @@ from . import Extension, Recollection
 
 
 logger = logging.getLogger(__name__)
+
+
+class Timer(threading.Thread):
+    """Persistent timer."""
+
+    def __init__(self, timeout, callback):
+        """Initialize the `Timer` class."""
+        super().__init__()
+        self.timeout = timeout
+        self.callback = callback
+        # The queue to control the timer
+        self.queue = queue.SimpleQueue()
+
+    def set(self):
+        """Set the timer."""
+        self.queue.put(True)
+
+    def stop(self):
+        """Stop the thread."""
+        self.queue.put(False)
+
+    def run(self):
+        """Run the thread."""
+        while True:
+            cmd = self.queue.get(block=True, timeout=None)
+            if cmd:
+                # Cool-down period
+                time.sleep(self.timeout)
+                # Empty the queue
+                while not self.queue.empty():
+                    self.queue.get(block=False)
+                # Call the callback function
+                self.callback()
+            else:
+                # Exit thread
+                return
 
 
 class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
@@ -30,6 +70,12 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
         self.core = core
         self.config = config[Extension.ext_name]
 
+        # Persistent timer for save on events
+        if self.config['save_on_events']:
+            self.timer = Timer(self.config['save_interval'], self.save_state)
+        else:
+            self.timer = None
+
         # State file
         data_dir = Extension.get_data_dir(config)
         self.statefile = pathlib.Path(data_dir) / 'autoplay.state'
@@ -43,13 +89,48 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
         """Called, when the extension is started."""
         logger.debug("on_start()")
 
-        state = self.read_state(self.statefile)
-        if state:
-            self.restore_state(state)
+        self.load_state()
+        if self.timer:
+            self.timer.start()
 
     def on_stop(self):                                          # noqa: D401
         """Called, when the extension is stopped."""
         logger.debug("on_stop()")
+
+        if self.timer:
+            self.timer.stop()
+        self.save_state()
+
+    def on_event(self, event, **kwargs):                        # noqa: D401
+        """Called on all events."""
+        logger.debug("on_event(%s, %s)", event, kwargs)
+
+        if event in self.config['save_on_events']:
+            self.timer.set()
+
+    # Main functions
+
+    def load_state(self):
+        """Load the state from the disk."""
+        logger.debug("load_state()")
+
+        state = self.read_state(self.statefile)
+        if state:
+            self.restore_state(state)
+
+        # Add required keys to the state dictionary
+        if 'tracklist' not in state:
+            state['tracklist'] = {}
+        if 'mixer' not in state:
+            state['mixer'] = {}
+        if 'playback' not in state:
+            state['playback'] = {}
+
+        self.state = state
+
+    def save_state(self):
+        """Save the state to the disk."""
+        logger.debug("save_state()")
 
         state = self.store_state()
         self.write_state(state, self.statefile)
@@ -234,12 +315,8 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
                 'mixer' and 'playback' controllers.
 
         """
-        # Initialize 'state' variable
-        state = {
-            'tracklist': {},
-            'mixer': {},
-            'playback': {},
-        }
+        # Shortcut
+        state = self.state
 
         # Tracks in tracklist
         tracklist = self.core.tracklist
@@ -302,8 +379,7 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
             logger.debug(
                 "State read from file '%s'.",
                 file)
-
-        return state
+            return state
 
     def write_state(self, state, file):
         """
