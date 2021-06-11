@@ -162,10 +162,8 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
             # Generate a list of track URIs from URIs
             track_uris = [
                 track.uri
-                for sublist
-                in self.core.library.lookup(uris).get().values()
-                for track
-                in sublist]
+                for sublist in self.core.library.lookup(uris).get().values()
+                for track in sublist]
             # Clear tracklist and add tracks
             self.core.tracklist.clear()
             self.core.tracklist.set_consume(False)
@@ -241,7 +239,7 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
             'tracklist': {},
             'mixer': {},
             'playback': {},
-            }
+        }
 
         # Tracks in tracklist
         tracklist = self.core.tracklist
