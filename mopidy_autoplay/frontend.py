@@ -126,7 +126,9 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
         if 'playback' not in state:
             state['playback'] = {}
 
-        self.state = state
+        # Save a reference to the state dictionary, so that we do not have to
+        # create it on every event, which would initiate a save.
+        self._state = state
 
     def save_state(self):
         """Save the state to the disk."""
@@ -315,8 +317,9 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
                 'mixer' and 'playback' controllers.
 
         """
-        # Shortcut
-        state = self.state
+        # Get the state dictionary from our internal cache, so that we do not
+        # have to recreate it
+        state = self._state
 
         # Tracks in tracklist
         tracklist = self.core.tracklist
