@@ -369,17 +369,18 @@ class AutoplayFrontend(pykka.ThreadingActor, core.CoreListener):
                 "No state restored, "
                 "because there was a problem opening the state file '%s': %s",
                 file, e)
-            return
+            state = {}
         except json.JSONDecodeError as e:
             logger.error(
                 "Error reading state from file '%s': %s",
                 file, e)
-            return
+            state = {}
         else:
             logger.debug(
                 "State read from file '%s'.",
                 file)
-            return state
+
+        return state
 
     def write_state(self, state, file):
         """
